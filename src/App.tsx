@@ -1,52 +1,39 @@
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent, type ReactNode } from "react";
+import { BrowserRouter, Routes, Route, Link, useLocation } from "react-router-dom";
 import "./App.css";
 
-// ---- Edit this data to make the site yours ----
 const SITE_NAME = "Saloni Shah";
 
-type NavItem = {
-  label: string;
-  href?: string;
-  children?: string[];
-};
-
-type FooterColumn = {
-  title: string;
-  links: string[];
-};
+// ---- Navigation ----
+type NavChild = { label: string; to: string };
+type NavItem = { label: string; to?: string; children?: NavChild[] };
 
 const NAV: NavItem[] = [
   {
     label: "Books",
-    children: ["All", "Book One", "Book Two", "Book Three", "Boxed Sets"],
+    children: [{ label: "Listening Silences", to: "/books/listening-silences" }],
   },
-  {
-    label: "About Me",
-    children: ["My Story", "Photo Album", "Music"],
-  },
-  { label: "Tour and Events", href: "#tour" },
-  {
-    label: "Shop",
-    children: ["All", "Art", "Clothing", "Stationery"],
-  },
+  { label: "About Me", to: "/about-me" },
+  { label: "Tour and Events", to: "/tour" },
+  { label: "Shop", to: "/shop" },
 ];
 
-const SOCIALS: string[] = ["Facebook", "Instagram", "YouTube", "TikTok", "Twitter", "Pinterest"];
+const SOCIALS: string[] = ["Facebook", "Instagram", "YouTube", "Twitter"];
 
-const FOOTER_COLUMNS: FooterColumn[] = [
-  { title: "About", links: ["My Story", "Press"] },
-  { title: "Shop", links: ["Art", "Books", "Clothing", "Stationery", "Wholesale"] },
-  { title: "Connect", links: ["Tour", "Live", "Newsletter", "Music"] },
-  { title: "Help", links: ["Contact", "Careers", "Shipping & Returns", "FAQ"] },
-];
+// ---- Layout pieces ----
+function ScrollToTop() {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+  return null;
+}
 
-type HeaderProps = {
-  cartCount: number;
-  onSearch: () => void;
-};
+type HeaderProps = { cartCount: number; onSearch: () => void };
 
 function Header({ cartCount, onSearch }: HeaderProps) {
   const [drawerOpen, setDrawerOpen] = useState<boolean>(false);
+  const closeDrawer = () => setDrawerOpen(false);
 
   return (
     <header className="header">
@@ -62,13 +49,13 @@ function Header({ cartCount, onSearch }: HeaderProps) {
           <span /><span /><span />
         </button>
 
-        <a className="header__title" href="/">{SITE_NAME}</a>
+        <Link className="header__title" to="/" onClick={closeDrawer}>{SITE_NAME}</Link>
 
         <div className="header__actions">
           <button className="link-btn" onClick={onSearch}>Search</button>
-          <a className="link-btn" href="#cart">
+          {/* <Link className="link-btn" to="/cart" onClick={closeDrawer}>
             Cart{cartCount > 0 && <span className="badge">{cartCount}</span>}
-          </a>
+          </Link> */}
         </div>
       </div>
 
@@ -86,12 +73,16 @@ function Header({ cartCount, onSearch }: HeaderProps) {
                   </button>
                   <ul className="dropdown">
                     {item.children.map((c) => (
-                      <li key={c}><a href="#">{c}</a></li>
+                      <li key={c.to}>
+                        <Link to={c.to} onClick={closeDrawer}>{c.label}</Link>
+                      </li>
                     ))}
                   </ul>
                 </>
               ) : (
-                <a className="nav__link" href={item.href}>{item.label}</a>
+                <Link className="nav__link" to={item.to!} onClick={closeDrawer}>
+                  {item.label}
+                </Link>
               )}
             </li>
           ))}
@@ -101,17 +92,87 @@ function Header({ cartCount, onSearch }: HeaderProps) {
   );
 }
 
+function Footer() {
+  return (
+    <footer className="footer">
+      <div className="footer__top">
+        <div className="footer__brand">
+          <span className="footer__logo">{SITE_NAME}</span>
+          <ul className="footer__socials">
+            {SOCIALS.map((s) => (
+              <li key={s}><a href="#">{s}</a></li>
+            ))}
+          </ul>
+        </div>
+
+        <div className="footer__col">
+          <h3>Explore</h3>
+          <ul>
+            <li><Link to="/books/listening-silences">Listening Silences</Link></li>
+            <li><Link to="/about-me">About Me</Link></li>
+            <li><Link to="/tour">Tour and Events</Link></li>
+            <li><Link to="/shop">Shop</Link></li>
+          </ul>
+        </div>
+      </div>
+
+      <div className="footer__bottom">
+        <p>© {new Date().getFullYear()}, {SITE_NAME}</p>
+        <ul>
+          <li><a href="#">Terms of Use</a></li>
+          <li><a href="#">Privacy Policy</a></li>
+        </ul>
+      </div>
+    </footer>
+  );
+}
+
+function Page({ title, children }: { title: string; children: ReactNode }) {
+  return (
+    <section className="page">
+      <h1 className="page__title">{title}</h1>
+      {children}
+    </section>
+  );
+}
+
+// ---- Poet intro (shared by Home and About Me) ----
+function Bio() {
+  return (
+    <div className="bio">
+      <p className="bio__lead">
+        Saloni Shah is a poet, storyteller, and listener based in Adelaide, Australia.
+      </p>
+      <p>
+        Born and raised in Palanpur, India, she has been writing since childhood, drawn to the
+        quiet stories hidden within everyday life. Shaped by family, migration, education, and a
+        career in technology, her poetry explores silence, memory, belonging, compassion, and
+        becoming.
+      </p>
+      <p>
+        She is fascinated by the way small, often-overlooked moments linger in the heart and
+        reveal deeper truths, and her work listens closely to the spaces between speech and
+        silence.
+      </p>
+      <p>
+        <Link className="bio__book" to="/books/listening-silences">Listening Silences</Link> is
+        her first poetry collection.
+      </p>
+    </div>
+  );
+}
+
+// ---- Pages ----
 function Hero() {
   return (
-    <section className="hero" id="tour">
-      {/* Replace this block with your own <img> or background-image */}
-      <a className="hero__link" href="#tour" aria-label="See tour dates">
+    <section className="hero">
+      <Link className="hero__link" to="/books/listening-silences" aria-label="Explore Listening Silences">
         <div className="hero__art">
-          <p className="hero__kicker">Live this season</p>
-          <h1 className="hero__heading">Tour dates are open</h1>
-          <span className="hero__cta">See where I’ll be</span>
+          <p className="hero__kicker">The first poetry collection</p>
+          <h1 className="hero__heading">Listening Silences</h1>
+          <span className="hero__cta">Explore the book</span>
         </div>
-      </a>
+      </Link>
     </section>
   );
 }
@@ -156,39 +217,73 @@ function Newsletter() {
   );
 }
 
-function Footer() {
+function HomePage() {
   return (
-    <footer className="footer">
-      <div className="footer__top">
-        <div className="footer__brand">
-          <span className="footer__logo">{SITE_NAME}</span>
-          <ul className="footer__socials">
-            {SOCIALS.map((s) => (
-              <li key={s}><a href="#">{s}</a></li>
-            ))}
-          </ul>
+    <>
+      <Hero />
+      <section className="intro">
+        <Bio />
+        <Link className="intro__more" to="/about-me">More about me</Link>
+      </section>
+      <Newsletter />
+    </>
+  );
+}
+
+function BookPage() {
+  return (
+    <Page title="Listening Silences">
+      <div className="book">
+        <div className="book__cover" aria-hidden="true">
+          <img src="/img/listening_silences.jpg" alt="Listening Silences cover" />
         </div>
-
-        {FOOTER_COLUMNS.map((col) => (
-          <div key={col.title} className="footer__col">
-            <h3>{col.title}</h3>
-            <ul>
-              {col.links.map((l) => (
-                <li key={l}><a href="#">{l}</a></li>
-              ))}
-            </ul>
-          </div>
-        ))}
+        <div className="book__body">
+          <p className="book__tag">Poetry collection by {SITE_NAME}</p>
+          <p>Listening Silences is Saloni Shah’s first poetry collection.</p>
+          <p className="muted">Add the book description, excerpts, and buy links here.</p>
+        </div>
       </div>
+    </Page>
+  );
+}
 
-      <div className="footer__bottom">
-        <p>© {new Date().getFullYear()}, {SITE_NAME}</p>
-        <ul>
-          <li><a href="#">Terms of Use</a></li>
-          <li><a href="#">Privacy Policy</a></li>
-        </ul>
-      </div>
-    </footer>
+function AboutPage() {
+  return (
+    <Page title="About Me">
+      <Bio />
+    </Page>
+  );
+}
+
+function ShopPage() {
+  return (
+    <Page title="Shop">
+      <p className="muted">Products will appear here.</p>
+    </Page>
+  );
+}
+
+function TourPage() {
+  return (
+    <Page title="Tour and Events">
+      <p className="muted">Upcoming events will be listed here.</p>
+    </Page>
+  );
+}
+
+function CartPage() {
+  return (
+    <Page title="Cart">
+      <p className="muted">Your cart is empty.</p>
+    </Page>
+  );
+}
+
+function NotFound() {
+  return (
+    <Page title="Page not found">
+      <p><Link className="bio__book" to="/">Back to the home page</Link></p>
+    </Page>
   );
 }
 
@@ -196,13 +291,21 @@ export default function App() {
   const [cartCount] = useState<number>(0);
 
   return (
-    <>
+    <BrowserRouter>
+      <ScrollToTop />
       <Header cartCount={cartCount} onSearch={() => alert("Hook up search here")} />
       <main id="main">
-        <Hero />
-        <Newsletter />
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/books/listening-silences" element={<BookPage />} />
+          <Route path="/about-me" element={<AboutPage />} />
+          <Route path="/tour" element={<TourPage />} />
+          <Route path="/shop" element={<ShopPage />} />
+          <Route path="/cart" element={<CartPage />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
       </main>
       <Footer />
-    </>
+    </BrowserRouter>
   );
 }
