@@ -1,8 +1,205 @@
-import { useEffect, useState, type FormEvent, type ReactNode } from "react";
+import {
+  useEffect,
+  useLayoutEffect,
+  useState,
+  type Dispatch,
+  type FormEvent,
+  type ReactNode,
+  type SetStateAction,
+} from "react";
 import { BrowserRouter, Routes, Route, Link, useLocation } from "react-router-dom";
 import "./App.css";
+import "./theme.css";
 
 const SITE_NAME = "Saloni Shah";
+
+// Set to false before the final launch to hide the color picker.
+const SHOW_THEME_PANEL = true;
+
+// ---- Theme (colors the client can change) ----
+type ThemeKey =
+  | "headerBg" | "headerInk"
+  | "heroFrom" | "heroTo" | "heroInk"
+  | "introBg" | "introInk"
+  | "newsBg" | "newsInk" | "newsBtn"
+  | "footerBg" | "footerInk"
+  | "pageBg" | "pageInk";
+
+type Theme = Record<ThemeKey, string>;
+
+// When the client picks final colors, paste them here to make them the default.
+const DEFAULT_THEME: Theme = {
+  headerBg: "#ffffff",
+  headerInk: "#1a1a1a",
+  heroFrom: "#e9e2d6",
+  heroTo: "#cfd8d3",
+  heroInk: "#1a1a1a",
+  introBg: "#ffffff",
+  introInk: "#1a1a1a",
+  newsBg: "#ffffff",
+  newsInk: "#1a1a1a",
+  newsBtn: "#1a1a1a",
+  footerBg: "#faf9f7",
+  footerInk: "#1a1a1a",
+  pageBg: "#ffffff",
+  pageInk: "#1a1a1a",
+};
+
+const CSS_VARS: Record<ThemeKey, string> = {
+  headerBg: "--header-bg",
+  headerInk: "--header-ink",
+  heroFrom: "--hero-from",
+  heroTo: "--hero-to",
+  heroInk: "--hero-ink",
+  introBg: "--intro-bg",
+  introInk: "--intro-ink",
+  newsBg: "--news-bg",
+  newsInk: "--news-ink",
+  newsBtn: "--news-btn",
+  footerBg: "--footer-bg",
+  footerInk: "--footer-ink",
+  pageBg: "--page-bg",
+  pageInk: "--page-ink",
+};
+
+const THEME_GROUPS: { title: string; fields: { key: ThemeKey; label: string }[] }[] = [
+  {
+    title: "Header and menu",
+    fields: [
+      { key: "headerBg", label: "Background" },
+      { key: "headerInk", label: "Text" },
+    ],
+  },
+  {
+    title: "Hero banner",
+    fields: [
+      { key: "heroFrom", label: "Background (start)" },
+      { key: "heroTo", label: "Background (end)" },
+      { key: "heroInk", label: "Text" },
+    ],
+  },
+  {
+    title: "Intro about the poet",
+    fields: [
+      { key: "introBg", label: "Background" },
+      { key: "introInk", label: "Text" },
+    ],
+  },
+  {
+    title: "Newsletter",
+    fields: [
+      { key: "newsBg", label: "Background" },
+      { key: "newsInk", label: "Text" },
+      { key: "newsBtn", label: "Button" },
+    ],
+  },
+  {
+    title: "Footer",
+    fields: [
+      { key: "footerBg", label: "Background" },
+      { key: "footerInk", label: "Text" },
+    ],
+  },
+  {
+    title: "Other pages",
+    fields: [
+      { key: "pageBg", label: "Background" },
+      { key: "pageInk", label: "Text" },
+    ],
+  },
+];
+
+const STORAGE_KEY = "site-theme-v1";
+const HEX = /^#[0-9a-f]{6}$/i;
+
+function loadTheme(): Theme {
+  if (!SHOW_THEME_PANEL) return DEFAULT_THEME;
+  try {
+    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "{}");
+    const merged: Theme = { ...DEFAULT_THEME };
+    (Object.keys(DEFAULT_THEME) as ThemeKey[]).forEach((k) => {
+      if (typeof saved[k] === "string" && HEX.test(saved[k])) merged[k] = saved[k];
+    });
+    return merged;
+  } catch {
+    return DEFAULT_THEME;
+  }
+}
+
+// Picks dark or light text so a button label stays readable on any color.
+function readableOn(hex: string): string {
+  const n = parseInt(hex.slice(1), 16);
+  const r = (n >> 16) & 255;
+  const g = (n >> 8) & 255;
+  const b = n & 255;
+  return (0.299 * r + 0.587 * g + 0.114 * b) / 255 > 0.6 ? "#1a1a1a" : "#ffffff";
+}
+
+type ThemePanelProps = {
+  theme: Theme;
+  setTheme: Dispatch<SetStateAction<Theme>>;
+};
+
+function ThemePanel({ theme, setTheme }: ThemePanelProps) {
+  const [open, setOpen] = useState<boolean>(false);
+  const [copied, setCopied] = useState<boolean>(false);
+
+  const copy = async () => {
+    const json = JSON.stringify(theme, null, 2);
+    try {
+      await navigator.clipboard.writeText(json);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      window.prompt("Copy these colors:", json);
+    }
+  };
+
+  return (
+    <div className="tp">
+      <button
+        className="tp__toggle"
+        onClick={() => setOpen((o) => !o)}
+        aria-expanded={open}
+      >
+        {open ? "Close" : "Customize colors"}
+      </button>
+
+      {open && (
+        <div className="tp__panel" role="dialog" aria-label="Customize colors">
+          <p className="tp__intro">
+            Pick a color for each part of the site. Changes show right away and are saved in this
+            browser.
+          </p>
+
+          {THEME_GROUPS.map((group) => (
+            <fieldset key={group.title} className="tp__group">
+              <legend>{group.title}</legend>
+              {group.fields.map((f) => (
+                <label key={f.key} className="tp__row">
+                  <span>{f.label}</span>
+                  <span className="tp__ctl">
+                    <code>{theme[f.key]}</code>
+                    <input
+                      type="color"
+                      value={theme[f.key]}
+                      onChange={(e) => setTheme((t) => ({ ...t, [f.key]: e.target.value }))}
+                    />
+                  </span>
+                </label>
+              ))}
+            </fieldset>
+          ))}
+
+          <div className="tp__actions">
+            <button onClick={() => setTheme(DEFAULT_THEME)}>Reset</button>
+            <button onClick={copy}>{copied ? "Copied" : "Copy my colors"}</button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
 // ---- Navigation ----
 type NavChild = { label: string; to: string };
@@ -29,9 +226,9 @@ function ScrollToTop() {
   return null;
 }
 
-type HeaderProps = { cartCount: number; onSearch: () => void };
+type HeaderProps = { onSearch: () => void };
 
-function Header({ cartCount, onSearch }: HeaderProps) {
+function Header({ onSearch }: HeaderProps) {
   const [drawerOpen, setDrawerOpen] = useState<boolean>(false);
   const closeDrawer = () => setDrawerOpen(false);
 
@@ -53,9 +250,6 @@ function Header({ cartCount, onSearch }: HeaderProps) {
 
         <div className="header__actions">
           <button className="link-btn" onClick={onSearch}>Search</button>
-          {/* <Link className="link-btn" to="/cart" onClick={closeDrawer}>
-            Cart{cartCount > 0 && <span className="badge">{cartCount}</span>}
-          </Link> */}
         </div>
       </div>
 
@@ -189,30 +383,32 @@ function Newsletter() {
 
   return (
     <section className="newsletter">
-      <h2 className="newsletter__title">the weekly letter</h2>
-      <p className="newsletter__sub">a short note in your inbox, every week</p>
+      <div className="newsletter__inner">
+        <h2 className="newsletter__title">the weekly letter</h2>
+        <p className="newsletter__sub">a short note in your inbox, every week</p>
 
-      {done ? (
-        <p className="newsletter__thanks">You’re subscribed. Check your inbox to confirm.</p>
-      ) : (
-        <form className="newsletter__form" onSubmit={submit}>
-          <label className="sr-only" htmlFor="email">Email address</label>
-          <input
-            id="email"
-            type="email"
-            required
-            placeholder="Email address"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-          <button type="submit">Subscribe</button>
-        </form>
-      )}
+        {done ? (
+          <p className="newsletter__thanks">You’re subscribed. Check your inbox to confirm.</p>
+        ) : (
+          <form className="newsletter__form" onSubmit={submit}>
+            <label className="sr-only" htmlFor="email">Email address</label>
+            <input
+              id="email"
+              type="email"
+              required
+              placeholder="Email address"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+            <button type="submit">Subscribe</button>
+          </form>
+        )}
 
-      <p className="newsletter__legal">
-        By joining our mailing list, you agree to our <a href="#">Terms of Use</a> and{" "}
-        <a href="#">Privacy Policy</a>.
-      </p>
+        <p className="newsletter__legal">
+          By joining our mailing list, you agree to our <a href="#">Terms of Use</a> and{" "}
+          <a href="#">Privacy Policy</a>.
+        </p>
+      </div>
     </section>
   );
 }
@@ -222,8 +418,10 @@ function HomePage() {
     <>
       <Hero />
       <section className="intro">
-        <Bio />
-        <Link className="intro__more" to="/about-me">More about me</Link>
+        <div className="intro__inner">
+          <Bio />
+          <Link className="intro__more" to="/about-me">More about me</Link>
+        </div>
       </section>
       <Newsletter />
     </>
@@ -288,12 +486,29 @@ function NotFound() {
 }
 
 export default function App() {
-  const [cartCount] = useState<number>(0);
+  const [theme, setTheme] = useState<Theme>(loadTheme);
+
+  // Push the chosen colors into CSS variables and remember them.
+  useLayoutEffect(() => {
+    const root = document.documentElement;
+    (Object.keys(CSS_VARS) as ThemeKey[]).forEach((k) => {
+      root.style.setProperty(CSS_VARS[k], theme[k]);
+    });
+    root.style.setProperty("--news-btn-ink", readableOn(theme.newsBtn));
+
+    if (SHOW_THEME_PANEL) {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(theme));
+      } catch {
+        /* storage unavailable, colors just won't persist */
+      }
+    }
+  }, [theme]);
 
   return (
     <BrowserRouter>
       <ScrollToTop />
-      <Header cartCount={cartCount} onSearch={() => alert("Hook up search here")} />
+      <Header onSearch={() => alert("Hook up search here")} />
       <main id="main">
         <Routes>
           <Route path="/" element={<HomePage />} />
@@ -306,6 +521,7 @@ export default function App() {
         </Routes>
       </main>
       <Footer />
+      {SHOW_THEME_PANEL && <ThemePanel theme={theme} setTheme={setTheme} />}
     </BrowserRouter>
   );
 }
