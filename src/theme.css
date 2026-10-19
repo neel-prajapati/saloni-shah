@@ -436,3 +436,100 @@ html body {
     max-height: 58vh;
   }
 }
+
+
+/* ---------- Curated artwork ---------- */
+.art-gallery {
+  margin: clamp(44px, 7vw, 76px) 0 8px;
+  padding: clamp(24px, 4vw, 40px);
+  color: var(--page-ink, #ffffff);
+  background: color-mix(in srgb, var(--page-ink, #ffffff) 6%, transparent);
+  border: 1px solid color-mix(in srgb, var(--page-ink, #ffffff) 18%, transparent);
+}
+.art-gallery__heading {
+  max-width: 600px;
+  margin: 0 auto 26px;
+  text-align: center;
+}
+.art-gallery__eyebrow {
+  margin: 0 0 8px;
+  font-size: 0.75rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  opacity: 0.8;
+}
+.art-gallery__heading h2 {
+  margin: 0 0 10px;
+  font-family: var(--serif);
+  font-size: clamp(1.7rem, 3.5vw, 2.4rem);
+  font-weight: 500;
+  color: var(--accent, #efde25);
+}
+.art-gallery__heading p:last-child {
+  margin: 0;
+  line-height: 1.65;
+  opacity: 0.88;
+}
+.art-gallery__grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: clamp(12px, 2vw, 22px);
+  align-items: start;
+}
+.art-gallery__item {
+  margin: 0;
+  min-width: 0;
+}
+.art-gallery__item img {
+  display: block;
+  width: 100%;
+  height: clamp(150px, 21vw, 250px);
+  object-fit: contain;
+  padding: 8px;
+  background: #fffdf8;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.16);
+  transition: transform 180ms ease;
+}
+.art-gallery__item img:hover {
+  transform: translateY(-3px);
+}
+.art-gallery__item figcaption {
+  margin-top: 10px;
+  font-size: 0.9rem;
+  text-align: center;
+  opacity: 0.88;
+}
+.book__artwork {
+  max-width: 240px;
+  margin: 22px 0 12px;
+}
+.book__artwork img {
+  display: block;
+  width: 100%;
+  max-height: 190px;
+  object-fit: contain;
+  padding: 6px;
+  background: #fffdf8;
+}
+.book__artwork figcaption {
+  margin-top: 7px;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  opacity: 0.82;
+}
+@media (max-width: 700px) {
+  .art-gallery__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .art-gallery__item img {
+    height: clamp(150px, 42vw, 230px);
+  }
+}
+@media (max-width: 380px) {
+  .art-gallery__grid {
+    gap: 10px;
+  }
+  .art-gallery {
+    padding: 18px 12px;
+  }
+}

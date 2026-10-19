@@ -24,7 +24,6 @@ type ThemeKey =
   | "headerBg" | "headerInk"
   | "heroFrom" | "heroTo" | "heroInk"
   | "introBg" | "introInk"
-  | "newsBg" | "newsInk" | "newsBtn"
   | "footerBg" | "footerInk"
   | "pageBg" | "pageInk"
   | "accent";
@@ -41,9 +40,6 @@ const DEFAULT_THEME: Theme = {
   heroInk: "#ffffff",
   introBg: "#fff8ea",
   introInk: "#012169",
-  newsBg: "#efde25",
-  newsInk: "#012169",
-  newsBtn: "#012169",
   footerBg: "#012169",
   footerInk: "#ffffff",
   pageBg: "#c44a21",
@@ -59,9 +55,6 @@ const CSS_VARS: Record<ThemeKey, string> = {
   heroInk: "--hero-ink",
   introBg: "--intro-bg",
   introInk: "--intro-ink",
-  newsBg: "--news-bg",
-  newsInk: "--news-ink",
-  newsBtn: "--news-btn",
   footerBg: "--footer-bg",
   footerInk: "--footer-ink",
   pageBg: "--page-bg",
@@ -90,14 +83,6 @@ const THEME_GROUPS: { title: string; fields: { key: ThemeKey; label: string }[] 
     fields: [
       { key: "introBg", label: "Background" },
       { key: "introInk", label: "Text" },
-    ],
-  },
-  {
-    title: "Newsletter",
-    fields: [
-      { key: "newsBg", label: "Background" },
-      { key: "newsInk", label: "Text" },
-      { key: "newsBtn", label: "Button" },
     ],
   },
   {
@@ -405,47 +390,6 @@ function Hero() {
   );
 }
 
-function Newsletter() {
-  const [email, setEmail] = useState<string>("");
-  const [done, setDone] = useState<boolean>(false);
-
-  const submit = (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    // TODO: wire this to Mailchimp / Klaviyo / your backend
-    setDone(true);
-  };
-
-  return (
-    <section className="newsletter">
-      <div className="newsletter__inner">
-        <h2 className="newsletter__title">the weekly letter</h2>
-        <p className="newsletter__sub">a short note in your inbox, every week</p>
-
-        {done ? (
-          <p className="newsletter__thanks">You’re subscribed. Check your inbox to confirm.</p>
-        ) : (
-          <form className="newsletter__form" onSubmit={submit}>
-            <label className="sr-only" htmlFor="email">Email address</label>
-            <input
-              id="email"
-              type="email"
-              required
-              placeholder="Email address"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-            <button type="submit">Subscribe</button>
-          </form>
-        )}
-
-        <p className="newsletter__legal">
-          By joining our mailing list, you agree to our <a href="#">Terms of Use</a> and{" "}
-          <a href="#">Privacy Policy</a>.
-        </p>
-      </div>
-    </section>
-  );
-}
 
 function HomePage() {
   return (
@@ -458,7 +402,6 @@ function HomePage() {
           <Link className="intro__more" to="/about-me">More about me</Link>
         </div>
       </section>
-      {Math.random() > 500 && <Newsletter />}
     </>
   );
 }
@@ -473,6 +416,10 @@ function BookPage() {
         <div className="book__body">
           <p className="book__tag">Poetry collection by {SITE_NAME}</p>
           <p>Listening Silences is Saloni Shah’s first poetry collection.</p>
+          <figure className="book__artwork">
+            <img src="/img/art%20(6).jpg" alt="Handwritten poetry artwork on a pale background" loading="lazy" />
+            <figcaption>A glimpse into the world of words and feeling.</figcaption>
+          </figure>
           <BuyButton />
         </div>
       </div>
@@ -480,10 +427,38 @@ function BookPage() {
   );
 }
 
+const ARTWORKS = [
+  { src: "/img/art1.jpg", alt: "Watercolour artwork with blue washes and a small red flower", caption: "" },
+  { src: "/img/art3.jpg", alt: "Blue and red abstract bird artwork", caption: "" },
+  { src: "/img/art4.jpg", alt: "Abstract artwork in deep blue and green", caption: "" },
+  { src: "/img/art6.jpg", alt: "Colourful radial watercolour artwork", caption: "" },
+];
+
+function ArtworkGallery() {
+  return (
+    <section className="art-gallery" aria-labelledby="art-gallery-title">
+      <div className="art-gallery__heading">
+        <p className="art-gallery__eyebrow">A little more to explore</p>
+        <h2 id="art-gallery-title">Poetry in colour</h2>
+        <p>A small selection of artwork inspired by imagination, memory, and the everyday.</p>
+      </div>
+      <div className="art-gallery__grid">
+        {ARTWORKS.map((artwork) => (
+          <figure className="art-gallery__item" key={artwork.src}>
+            <img src={artwork.src} alt={artwork.alt} loading="lazy" />
+            <figcaption>{artwork.caption}</figcaption>
+          </figure>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 function AboutPage() {
   return (
     <Page title="About Me">
       <Bio />
+      <ArtworkGallery />
     </Page>
   );
 }
@@ -626,7 +601,6 @@ export default function App() {
     (Object.keys(CSS_VARS) as ThemeKey[]).forEach((k) => {
       root.style.setProperty(CSS_VARS[k], theme[k]);
     });
-    root.style.setProperty("--news-btn-ink", readableOn(theme.newsBtn));
     root.style.setProperty("--accent-ink", readableOn(theme.accent));
 
     if (SHOW_THEME_PANEL) {
