@@ -1,9 +1,11 @@
 /* Loaded after App.css, so these rules override the fixed colors there.
-   The variables are set from the color picker in App.tsx. */
+   The variables are set from the color picker in App.tsx.
+   The fallback values after each comma are the brand palette:
+   rust #c44a21, yellow #efde25, blue #012169. */
 
 html body {
-  background: var(--page-bg, #ffffff);
-  color: var(--page-ink, #1a1a1a);
+  background: var(--page-bg, #c44a21);
+  color: var(--page-ink, #ffffff);
 }
 
 :focus-visible {
@@ -13,52 +15,111 @@ html body {
 .muted,
 .book__tag {
   color: inherit;
-  opacity: 0.7;
+  opacity: 0.85;
+}
+
+.page__title {
+  color: var(--accent, #efde25);
+}
+
+/* ---------- Buttons ---------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 28px;
+  font: inherit;
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--accent-ink, #012169);
+  background: var(--accent, #efde25);
+  border: 1px solid var(--accent, #efde25);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.28);
+}
+.btn svg {
+  transition: transform 0.18s ease;
+}
+.btn:hover svg {
+  transform: translate(2px, -2px);
 }
 
 /* ---------- Header and menu ---------- */
 .header {
-  background: var(--header-bg, #ffffff);
-  color: var(--header-ink, #1a1a1a);
-  border-bottom-color: color-mix(in srgb, var(--header-ink, #1a1a1a) 15%, transparent);
+  background: var(--header-bg, #012169);
+  color: var(--header-ink, #efde25);
+  border-bottom-color: color-mix(in srgb, var(--header-ink, #efde25) 18%, transparent);
+}
+.header__bar {
+  padding-top: 24px;
+  padding-bottom: 10px;
+}
+.header__title {
+  font-size: clamp(2.1rem, 4.8vw, 3.2rem);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  line-height: 1.1;
 }
 .header .link-btn,
 .header .nav__link {
-  color: var(--header-ink, #1a1a1a);
+  color: var(--header-ink, #efde25);
+}
+.header .nav__link {
+  font-weight: 500;
+  letter-spacing: 0.03em;
 }
 .header .icon-btn span {
-  background: var(--header-ink, #1a1a1a);
+  background: var(--header-ink, #efde25);
 }
 .dropdown {
-  background: var(--header-bg, #ffffff);
-  border-color: color-mix(in srgb, var(--header-ink, #1a1a1a) 15%, transparent);
+  background: var(--header-bg, #012169);
+  border-color: color-mix(in srgb, var(--header-ink, #efde25) 22%, transparent);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.25);
 }
 .dropdown a {
-  color: var(--header-ink, #1a1a1a);
-  opacity: 0.75;
+  color: var(--header-ink, #efde25);
+  opacity: 0.85;
 }
 .dropdown a:hover {
-  color: var(--header-ink, #1a1a1a);
+  color: var(--header-ink, #efde25);
   opacity: 1;
-  background: color-mix(in srgb, var(--header-ink, #1a1a1a) 8%, transparent);
+  background: color-mix(in srgb, var(--header-ink, #efde25) 10%, transparent);
 }
 
 /* ---------- Hero ---------- */
 .hero__art {
-  background: linear-gradient(135deg, var(--hero-from, #e9e2d6) 0%, var(--hero-to, #cfd8d3) 100%);
-  color: var(--hero-ink, #1a1a1a);
+  background:
+    radial-gradient(
+      circle at 85% 12%,
+      color-mix(in srgb, var(--accent, #efde25) 42%, transparent) 0%,
+      transparent 52%
+    ),
+    linear-gradient(135deg, var(--hero-from, #c44a21) 0%, var(--hero-to, #c44a21) 100%);
+  color: var(--hero-ink, #ffffff);
 }
 .hero__kicker {
   color: inherit;
-  opacity: 0.75;
+  opacity: 0.92;
+  font-size: 0.8rem;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+.hero__heading {
+  color: var(--accent, #efde25);
+  text-shadow: 0 2px 24px rgba(0, 0, 0, 0.18);
 }
 .hero__cta {
   border-color: currentColor;
 }
 .hero__link:hover .hero__cta {
-  background: var(--hero-ink, #1a1a1a);
-  border-color: var(--hero-ink, #1a1a1a);
-  color: var(--hero-from, #e9e2d6);
+  background: var(--accent, #efde25);
+  border-color: var(--accent, #efde25);
+  color: var(--accent-ink, #012169);
 }
 
 /* ---------- Intro about the poet ---------- */
@@ -66,8 +127,8 @@ html body {
   max-width: none;
   margin: 0;
   padding: clamp(56px, 9vw, 104px) var(--pad);
-  background: var(--intro-bg, #ffffff);
-  color: var(--intro-ink, #1a1a1a);
+  background: var(--intro-bg, #fff8ea);
+  color: var(--intro-ink, #012169);
 }
 .intro__inner {
   max-width: 680px;
@@ -80,8 +141,8 @@ html body {
   max-width: none;
   margin: 0;
   padding: clamp(56px, 10vw, 112px) var(--pad);
-  background: var(--news-bg, #ffffff);
-  color: var(--news-ink, #1a1a1a);
+  background: var(--news-bg, #efde25);
+  color: var(--news-ink, #012169);
 }
 .newsletter__inner {
   max-width: 560px;
@@ -91,44 +152,121 @@ html body {
 .newsletter__sub,
 .newsletter__legal {
   color: inherit;
-  opacity: 0.7;
+  opacity: 0.78;
 }
 .newsletter__form input {
-  border-color: var(--news-ink, #1a1a1a);
-  color: var(--news-ink, #1a1a1a);
+  border-color: var(--news-ink, #012169);
+  color: var(--news-ink, #012169);
+}
+.newsletter__form input::placeholder {
+  color: color-mix(in srgb, var(--news-ink, #012169) 60%, transparent);
 }
 .newsletter__form button {
-  background: var(--news-btn, #1a1a1a);
-  border-color: var(--news-btn, #1a1a1a);
+  background: var(--news-btn, #012169);
+  border-color: var(--news-btn, #012169);
   color: var(--news-btn-ink, #ffffff);
 }
 .newsletter__form button:hover {
-  background: var(--news-btn, #1a1a1a);
-  filter: brightness(0.9);
+  background: var(--news-btn, #012169);
+  filter: brightness(1.15);
 }
 .newsletter__thanks {
-  border-color: color-mix(in srgb, var(--news-ink, #1a1a1a) 25%, transparent);
+  border-color: color-mix(in srgb, var(--news-ink, #012169) 30%, transparent);
 }
 
 /* ---------- Footer ---------- */
 .footer {
-  background: var(--footer-bg, #faf9f7);
-  color: var(--footer-ink, #1a1a1a);
-  border-top-color: color-mix(in srgb, var(--footer-ink, #1a1a1a) 15%, transparent);
+  background: var(--footer-bg, #012169);
+  color: var(--footer-ink, #ffffff);
+  border-top-color: color-mix(in srgb, var(--footer-ink, #ffffff) 15%, transparent);
+}
+.footer__logo,
+.footer__col h3 {
+  color: var(--accent, #efde25);
 }
 .footer__col li,
 .footer__bottom {
   color: inherit;
-  opacity: 0.8;
+  opacity: 0.85;
 }
 .footer__bottom {
-  border-top-color: color-mix(in srgb, var(--footer-ink, #1a1a1a) 15%, transparent);
+  border-top-color: color-mix(in srgb, var(--footer-ink, #ffffff) 18%, transparent);
+}
+
+/* ---------- Book page ---------- */
+.book__cover {
+  display: block;
+  aspect-ratio: auto;
+  padding: 0;
+  background: none;
+  box-shadow: 0 16px 38px rgba(0, 0, 0, 0.32);
+}
+.book__cover img {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+.book__body .btn {
+  margin-top: 12px;
+}
+
+/* ---------- Shop page ---------- */
+.product {
+  display: grid;
+  grid-template-columns: minmax(140px, 220px) 1fr;
+  gap: clamp(20px, 4vw, 44px);
+  align-items: center;
+  padding: clamp(20px, 4vw, 36px);
+  background: color-mix(in srgb, var(--page-ink, #ffffff) 9%, transparent);
+  border: 1px solid color-mix(in srgb, var(--page-ink, #ffffff) 26%, transparent);
+}
+.product__cover img {
+  display: block;
+  width: 100%;
+  height: auto;
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.35);
+}
+.product__eyebrow {
+  margin: 0 0 8px;
+  font-size: 0.78rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  opacity: 0.85;
+}
+.product__title {
+  margin: 0;
+  font-family: var(--serif);
+  font-weight: 500;
+  font-size: clamp(1.9rem, 4vw, 2.7rem);
+  line-height: 1.1;
+  color: var(--accent, #efde25);
+}
+.product__author {
+  margin: 6px 0 18px;
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 1.25rem;
+  opacity: 0.92;
+}
+.product__note {
+  margin: 0 0 24px;
+  opacity: 0.9;
+}
+
+@media (max-width: 600px) {
+  .product {
+    grid-template-columns: 1fr;
+  }
+  .product__cover {
+    max-width: 200px;
+  }
 }
 
 /* ---------- Color picker panel (keeps its own fixed colors) ---------- */
 .tp {
   position: fixed;
-  left: 16px;
+  right: 16px;
   bottom: 16px;
   z-index: 100;
   display: flex;

@@ -16,6 +16,9 @@ const SITE_NAME = "Saloni Shah";
 // Set to false before the final launch to hide the color picker.
 const SHOW_THEME_PANEL = true;
 
+const AMAZON_URL =
+  "https://www.amazon.com.au/Listening-Silences-Somewhere-Saloni-Shah/dp/1923843311";
+
 // ---- Theme (colors the client can change) ----
 type ThemeKey =
   | "headerBg" | "headerInk"
@@ -23,26 +26,29 @@ type ThemeKey =
   | "introBg" | "introInk"
   | "newsBg" | "newsInk" | "newsBtn"
   | "footerBg" | "footerInk"
-  | "pageBg" | "pageInk";
+  | "pageBg" | "pageInk"
+  | "accent";
 
 type Theme = Record<ThemeKey, string>;
 
+// Brand colors: rust #C44A21, yellow #EFDE25, blue #012169.
 // When the client picks final colors, paste them here to make them the default.
 const DEFAULT_THEME: Theme = {
-  headerBg: "#ffffff",
-  headerInk: "#1a1a1a",
-  heroFrom: "#e9e2d6",
-  heroTo: "#cfd8d3",
-  heroInk: "#1a1a1a",
-  introBg: "#ffffff",
-  introInk: "#1a1a1a",
-  newsBg: "#ffffff",
-  newsInk: "#1a1a1a",
-  newsBtn: "#1a1a1a",
-  footerBg: "#faf9f7",
-  footerInk: "#1a1a1a",
-  pageBg: "#ffffff",
-  pageInk: "#1a1a1a",
+  headerBg: "#012169",
+  headerInk: "#efde25",
+  heroFrom: "#c44a21",
+  heroTo: "#c44a21",
+  heroInk: "#ffffff",
+  introBg: "#fff8ea",
+  introInk: "#012169",
+  newsBg: "#efde25",
+  newsInk: "#012169",
+  newsBtn: "#012169",
+  footerBg: "#012169",
+  footerInk: "#ffffff",
+  pageBg: "#c44a21",
+  pageInk: "#ffffff",
+  accent: "#efde25",
 };
 
 const CSS_VARS: Record<ThemeKey, string> = {
@@ -60,6 +66,7 @@ const CSS_VARS: Record<ThemeKey, string> = {
   footerInk: "--footer-ink",
   pageBg: "--page-bg",
   pageInk: "--page-ink",
+  accent: "--accent",
 };
 
 const THEME_GROUPS: { title: string; fields: { key: ThemeKey; label: string }[] }[] = [
@@ -107,9 +114,14 @@ const THEME_GROUPS: { title: string; fields: { key: ThemeKey; label: string }[] 
       { key: "pageInk", label: "Text" },
     ],
   },
+  {
+    title: "Highlights",
+    fields: [{ key: "accent", label: "Headings and buttons" }],
+  },
 ];
 
-const STORAGE_KEY = "site-theme-v1";
+// Bumped to v2 so colors saved from the earlier draft don't hide the new palette.
+const STORAGE_KEY = "site-theme-v2";
 const HEX = /^#[0-9a-f]{6}$/i;
 
 function loadTheme(): Theme {
@@ -126,13 +138,13 @@ function loadTheme(): Theme {
   }
 }
 
-// Picks dark or light text so a button label stays readable on any color.
+// Picks blue or white text so a button label stays readable on any color.
 function readableOn(hex: string): string {
   const n = parseInt(hex.slice(1), 16);
   const r = (n >> 16) & 255;
   const g = (n >> 8) & 255;
   const b = n & 255;
-  return (0.299 * r + 0.587 * g + 0.114 * b) / 255 > 0.6 ? "#1a1a1a" : "#ffffff";
+  return (0.299 * r + 0.587 * g + 0.114 * b) / 255 > 0.6 ? "#012169" : "#ffffff";
 }
 
 type ThemePanelProps = {
@@ -211,7 +223,8 @@ const NAV: NavItem[] = [
     children: [{ label: "Listening Silences", to: "/books/listening-silences" }],
   },
   { label: "About Me", to: "/about-me" },
-  { label: "Tour and Events", to: "/tour" },
+  { label: "Events", to: "/events" },
+  { label: "Blog", to: "/blog" },
   { label: "Shop", to: "/shop" },
 ];
 
@@ -226,9 +239,7 @@ function ScrollToTop() {
   return null;
 }
 
-type HeaderProps = { onSearch: () => void };
-
-function Header({ onSearch }: HeaderProps) {
+function Header() {
   const [drawerOpen, setDrawerOpen] = useState<boolean>(false);
   const closeDrawer = () => setDrawerOpen(false);
 
@@ -247,10 +258,6 @@ function Header({ onSearch }: HeaderProps) {
         </button>
 
         <Link className="header__title" to="/" onClick={closeDrawer}>{SITE_NAME}</Link>
-
-        <div className="header__actions">
-          <button className="link-btn" onClick={onSearch}>Search</button>
-        </div>
       </div>
 
       <nav className={`nav ${drawerOpen ? "nav--open" : ""}`} aria-label="Main">
@@ -304,7 +311,8 @@ function Footer() {
           <ul>
             <li><Link to="/books/listening-silences">Listening Silences</Link></li>
             <li><Link to="/about-me">About Me</Link></li>
-            <li><Link to="/tour">Tour and Events</Link></li>
+            <li><Link to="/events">Events</Link></li>
+            <li><Link to="/blog">Blog</Link></li>
             <li><Link to="/shop">Shop</Link></li>
           </ul>
         </div>
@@ -327,6 +335,17 @@ function Page({ title, children }: { title: string; children: ReactNode }) {
       <h1 className="page__title">{title}</h1>
       {children}
     </section>
+  );
+}
+
+function BuyButton() {
+  return (
+    <a className="btn" href={AMAZON_URL} target="_blank" rel="noopener noreferrer">
+      Buy on Amazon
+      <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true">
+        <path d="M3 11L11 3M5 3h6v6" fill="none" stroke="currentColor" strokeWidth="1.5" />
+      </svg>
+    </a>
   );
 }
 
@@ -432,13 +451,13 @@ function BookPage() {
   return (
     <Page title="Listening Silences">
       <div className="book">
-        <div className="book__cover" aria-hidden="true">
-          <img src="/img/listening_silences.jpg" alt="Listening Silences cover" />
+        <div className="book__cover">
+          <img src="/img/listening_silences.jpg" alt="Listening Silences book cover" />
         </div>
         <div className="book__body">
           <p className="book__tag">Poetry collection by {SITE_NAME}</p>
           <p>Listening Silences is Saloni Shah’s first poetry collection.</p>
-          <p className="muted">Add the book description, excerpts, and buy links here.</p>
+          <BuyButton />
         </div>
       </div>
     </Page>
@@ -456,15 +475,34 @@ function AboutPage() {
 function ShopPage() {
   return (
     <Page title="Shop">
-      <p className="muted">Products will appear here.</p>
+      <article className="product">
+        <div className="product__cover">
+          <img src="/img/listening_silences.jpg" alt="Listening Silences book cover" />
+        </div>
+        <div className="product__body">
+          <p className="product__eyebrow">Poetry collection</p>
+          <h2 className="product__title">Listening Silences</h2>
+          <p className="product__author">by {SITE_NAME}</p>
+          <p className="product__note">Order your copy from Amazon Australia.</p>
+          <BuyButton />
+        </div>
+      </article>
     </Page>
   );
 }
 
-function TourPage() {
+function EventsPage() {
   return (
-    <Page title="Tour and Events">
+    <Page title="Events">
       <p className="muted">Upcoming events will be listed here.</p>
+    </Page>
+  );
+}
+
+function BlogPage() {
+  return (
+    <Page title="Blog">
+      <p className="muted">Posts will appear here.</p>
     </Page>
   );
 }
@@ -495,6 +533,7 @@ export default function App() {
       root.style.setProperty(CSS_VARS[k], theme[k]);
     });
     root.style.setProperty("--news-btn-ink", readableOn(theme.newsBtn));
+    root.style.setProperty("--accent-ink", readableOn(theme.accent));
 
     if (SHOW_THEME_PANEL) {
       try {
@@ -508,13 +547,14 @@ export default function App() {
   return (
     <BrowserRouter>
       <ScrollToTop />
-      <Header onSearch={() => alert("Hook up search here")} />
+      <Header />
       <main id="main">
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/books/listening-silences" element={<BookPage />} />
           <Route path="/about-me" element={<AboutPage />} />
-          <Route path="/tour" element={<TourPage />} />
+          <Route path="/events" element={<EventsPage />} />
+          <Route path="/blog" element={<BlogPage />} />
           <Route path="/shop" element={<ShopPage />} />
           <Route path="/cart" element={<CartPage />} />
           <Route path="*" element={<NotFound />} />
