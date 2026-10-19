@@ -352,3 +352,87 @@ html body {
   background: #ffffff;
   border-color: #c9c5bd;
 }
+
+
+/* ---------- Homepage feature image ---------- */
+.hero-image {
+  width: 100%;
+  overflow: hidden;
+  background: var(--hero-from, #c44a21);
+}
+.hero-image img {
+  display: block;
+  width: 100%;
+  max-height: min(78vh, 820px);
+  min-height: 280px;
+  object-fit: cover;
+  object-position: center;
+}
+
+/* ---------- Contact page ---------- */
+.contact {
+  width: min(100%, 720px);
+  margin: 0 auto;
+}
+.contact__intro {
+  margin: 0 0 28px;
+  line-height: 1.7;
+}
+.contact__form {
+  display: grid;
+  gap: 10px;
+}
+.contact__form label {
+  margin-top: 8px;
+  font-weight: 600;
+}
+.contact__form input,
+.contact__form textarea {
+  width: 100%;
+  padding: 13px 14px;
+  font: inherit;
+  color: var(--page-ink, #ffffff);
+  background: color-mix(in srgb, var(--page-ink, #ffffff) 7%, transparent);
+  border: 1px solid color-mix(in srgb, var(--page-ink, #ffffff) 38%, transparent);
+  border-radius: 2px;
+}
+.contact__form textarea {
+  resize: vertical;
+}
+.contact__form input:focus,
+.contact__form textarea:focus {
+  outline: 2px solid var(--accent, #efde25);
+  outline-offset: 2px;
+}
+.contact__form .btn {
+  justify-self: start;
+  margin-top: 14px;
+  cursor: pointer;
+}
+.contact__form .btn:disabled {
+  cursor: wait;
+  opacity: 0.7;
+}
+.contact__status {
+  margin: 8px 0 0;
+  line-height: 1.5;
+}
+.contact__status--success {
+  color: #b8f2c5;
+}
+.contact__status--error {
+  color: #ffd0c8;
+}
+.contact__email {
+  margin-top: 24px;
+}
+.contact__email a {
+  color: inherit;
+  text-underline-offset: 3px;
+}
+@media (max-width: 600px) {
+  .hero-image img {
+    min-height: 220px;
+    max-height: 58vh;
+  }
+}

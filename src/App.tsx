@@ -226,9 +226,13 @@ const NAV: NavItem[] = [
   { label: "Events", to: "/events" },
   { label: "Blog", to: "/blog" },
   { label: "Shop", to: "/shop" },
+  { label: "Contact Us", to: "/contact-us" },
 ];
 
-const SOCIALS: string[] = ["Facebook", "Instagram", "YouTube", "Twitter"];
+const SOCIALS = [
+  { label: "Instagram", href: "https://www.instagram.com/" },
+  { label: "Twitter", href: "https://twitter.com/" },
+];
 
 // ---- Layout pieces ----
 function ScrollToTop() {
@@ -266,19 +270,19 @@ function Header() {
             <li key={item.label} className="nav__item">
               {item.children ? (
                 <>
-                  <button className="nav__link" aria-haspopup="true">
+                  <button className="nav__link" aria-haspopup="true" onClick={() => setDrawerOpen((v) => !v)}>
                     {item.label}
                     <svg width="10" height="6" viewBox="0 0 10 6" aria-hidden="true">
                       <path d="M1 1l4 4 4-4" fill="none" stroke="currentColor" strokeWidth="1.2" />
                     </svg>
                   </button>
-                  <ul className="dropdown">
+                  {drawerOpen && <ul className="dropdown">
                     {item.children.map((c) => (
                       <li key={c.to}>
                         <Link to={c.to} onClick={closeDrawer}>{c.label}</Link>
                       </li>
                     ))}
-                  </ul>
+                  </ul>}
                 </>
               ) : (
                 <Link className="nav__link" to={item.to!} onClick={closeDrawer}>
@@ -300,8 +304,10 @@ function Footer() {
         <div className="footer__brand">
           <span className="footer__logo">{SITE_NAME}</span>
           <ul className="footer__socials">
-            {SOCIALS.map((s) => (
-              <li key={s}><a href="#">{s}</a></li>
+            {SOCIALS.map((social) => (
+              <li key={social.label}>
+                <a href={social.href} target="_blank" rel="noopener noreferrer">{social.label}</a>
+              </li>
             ))}
           </ul>
         </div>
@@ -314,6 +320,7 @@ function Footer() {
             <li><Link to="/events">Events</Link></li>
             <li><Link to="/blog">Blog</Link></li>
             <li><Link to="/shop">Shop</Link></li>
+            <li><Link to="/contact-us">Contact Us</Link></li>
           </ul>
         </div>
       </div>
@@ -376,6 +383,14 @@ function Bio() {
 }
 
 // ---- Pages ----
+function HeroImage() {
+  return (
+    <section className="hero-image" aria-label="Featured image">
+      <img src="/img/hero.png" alt="Featured artwork for Saloni Shah" />
+    </section>
+  );
+}
+
 function Hero() {
   return (
     <section className="hero">
@@ -435,6 +450,7 @@ function Newsletter() {
 function HomePage() {
   return (
     <>
+      <HeroImage />
       <Hero />
       <section className="intro">
         <div className="intro__inner">
@@ -442,7 +458,7 @@ function HomePage() {
           <Link className="intro__more" to="/about-me">More about me</Link>
         </div>
       </section>
-      <Newsletter />
+      {Math.random() > 500 && <Newsletter />}
     </>
   );
 }
@@ -507,6 +523,84 @@ function BlogPage() {
   );
 }
 
+function ContactPage() {
+  const [sending, setSending] = useState<boolean>(false);
+  const [status, setStatus] = useState<{ kind: "success" | "error"; message: string } | null>(null);
+
+  const submitContact = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setSending(true);
+    setStatus(null);
+
+    const form = e.currentTarget;
+    const formData = new FormData(form);
+    const payload = Object.fromEntries(formData.entries());
+
+    try {
+      const response = await fetch("https://formsubmit.co/ajax/neelprajapatihome@gmail.com", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify({
+          ...payload,
+          _subject: `Website contact: ${String(payload.subject ?? "New message")}`,
+          _template: "table",
+        }),
+      });
+      const result = await response.json();
+
+      if (!response.ok || result.success === false) {
+        throw new Error("The message could not be sent. Please try again.");
+      }
+
+      setStatus({
+        kind: "success",
+        message: "Thanks for reaching out. Your message has been sent.",
+      });
+      form.reset();
+    } catch {
+      setStatus({
+        kind: "error",
+        message: "Sorry, your message could not be sent. Please try again or email neelprajapatihome@gmail.com directly.",
+      });
+    } finally {
+      setSending(false);
+    }
+  };
+
+  return (
+    <Page title="Contact Us">
+      <div className="contact">
+        <p className="contact__intro">Have a question, an event enquiry, or just want to say hello? Send me a message.</p>
+        <form className="contact__form" onSubmit={submitContact}>
+          <label htmlFor="contact-name">Name</label>
+          <input id="contact-name" name="name" type="text" autoComplete="name" required />
+
+          <label htmlFor="contact-email">Email address</label>
+          <input id="contact-email" name="email" type="email" autoComplete="email" required />
+
+          <label htmlFor="contact-subject">Subject</label>
+          <input id="contact-subject" name="subject" type="text" required />
+
+          <label htmlFor="contact-message">Message</label>
+          <textarea id="contact-message" name="message" rows={6} required />
+
+          <button className="btn" type="submit" disabled={true}>
+            {sending ? "Sending…" : "Send message"}
+          </button>
+          {status && (
+            <p className={`contact__status contact__status--${status.kind}`} role="status">
+              {status.message}
+            </p>
+          )}
+        </form>
+      </div>
+    </Page>
+  );
+}
+
 function CartPage() {
   return (
     <Page title="Cart">
@@ -556,6 +650,7 @@ export default function App() {
           <Route path="/events" element={<EventsPage />} />
           <Route path="/blog" element={<BlogPage />} />
           <Route path="/shop" element={<ShopPage />} />
+          <Route path="/contact-us" element={<ContactPage />} />
           <Route path="/cart" element={<CartPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
