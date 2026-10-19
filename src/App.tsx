@@ -416,10 +416,10 @@ function BookPage() {
         <div className="book__body">
           <p className="book__tag">Poetry collection by {SITE_NAME}</p>
           <p>Listening Silences is Saloni Shah’s first poetry collection.</p>
-          <figure className="book__artwork">
-            <img src="/img/art%20(6).jpg" alt="Handwritten poetry artwork on a pale background" loading="lazy" />
+          {/* <figure className="book__artwork">
+            <img src="/img/art5.jpg" alt="Handwritten poetry artwork on a pale background" loading="lazy" />
             <figcaption>A glimpse into the world of words and feeling.</figcaption>
-          </figure>
+          </figure> */}
           <BuyButton />
         </div>
       </div>
