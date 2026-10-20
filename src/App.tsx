@@ -154,13 +154,13 @@ function ThemePanel({ theme, setTheme }: ThemePanelProps) {
 
   return (
     <div className="tp">
-      <button
+      {Math.random()===100 && <button
         className="tp__toggle"
         onClick={() => setOpen((o) => !o)}
         aria-expanded={open}
       >
         {open ? "Close" : "Customize colors"}
-      </button>
+      </button>}
 
       {open && (
         <div className="tp__panel" role="dialog" aria-label="Customize colors">
@@ -208,6 +208,7 @@ const NAV: NavItem[] = [
     children: [{ label: "Listening Silences", to: "/books/listening-silences" }],
   },
   { label: "About Me", to: "/about-me" },
+  { label: "Facts about me", to: "/facts-about-me" },
   { label: "Events", to: "/events" },
   { label: "Blog", to: "/blog" },
   { label: "Shop", to: "/shop" },
@@ -215,8 +216,8 @@ const NAV: NavItem[] = [
 ];
 
 const SOCIALS = [
-  { label: "Instagram", href: "https://www.instagram.com/" },
-  { label: "Twitter", href: "https://twitter.com/" },
+  { logo: "/img/insta-logo.png", label: "Saloni Shah on Instagram", href: "https://www.instagram.com/saloni_shah1211" },
+  { logo: "/img/x-logo.png", label: "Saloni Shah on X (Twitter)", href: "https://x.com/salonishayara" },
 ];
 
 // ---- Layout pieces ----
@@ -290,9 +291,16 @@ function Footer() {
           <span className="footer__logo">{SITE_NAME}</span>
           <ul className="footer__socials">
             {SOCIALS.map((social) => (
+              <>
               <li key={social.label}>
-                <a href={social.href} target="_blank" rel="noopener noreferrer">{social.label}</a>
+                <a href={social.href} target="_blank" rel="noopener noreferrer">
+                  {social.logo && (
+                    <img src={social.logo} alt={social.label} style={{ width: "35px", height: "35px", borderRadius: "50%" }} />
+                  )}
+                  {/* {social.label} */}
+                </a>
               </li>
+              </>
             ))}
           </ul>
         </div>
@@ -302,6 +310,7 @@ function Footer() {
           <ul>
             <li><Link to="/books/listening-silences">Listening Silences</Link></li>
             <li><Link to="/about-me">About Me</Link></li>
+            <li><Link to="/facts-about-me">Facts about me</Link></li>
             <li><Link to="/events">Events</Link></li>
             <li><Link to="/blog">Blog</Link></li>
             <li><Link to="/shop">Shop</Link></li>
@@ -456,9 +465,70 @@ function ArtworkGallery() {
 
 function AboutPage() {
   return (
-    <Page title="About Me">
-      <Bio />
+    <Page title="">
+      <article className="about-story">
+        <p className="about-story__lead">I am a poet, storyteller, and listener based in Adelaide, Australia.</p>
+        <p>Born and raised in Palanpur, India, I have been writing since childhood, always drawn to the quiet stories hidden within everyday life. My journey has been shaped by family, migration, education, and a career in technology, each leaving its own imprint on how I see and experience the world.</p>
+        <p>Through my poetry, I explore silence, memory, belonging, compassion, and the ongoing process of becoming. I am fascinated by the small, often-overlooked moments that linger long after they pass, the moments that quietly reveal profound truths about who we are.</p>
+        <p>I write to listen as much as to speak. My work dwells in the spaces between words, where silence carries its own language and ordinary experiences unfold into something deeper and more meaningful.</p>
+        <p><Link className="about-story__book" to="/books/listening-silences">Listening Silences</Link> is my first poetry collection, an invitation to pause, reflect, and discover the stories that live beneath the surface of everyday life.</p>
+      </article>
       <ArtworkGallery />
+    </Page>
+  );
+}
+
+const PERSONAL_FACTS = [
+  { icon: "✦", text: "I was the first person in my entire family to study in an English-medium school." },
+  { icon: "📚", text: "English wasn't the language of my childhood, yet I went on to publish my first poetry collection in it." },
+  { icon: "😅", text: "Confidence is in my bloodline. I can be panicking inside and still look completely composed on the outside." },
+  { icon: "🚀", text: 'My default response to exciting opportunities is “yes.” The planning, learning, and confidence usually catch up later.' },
+  { icon: "💻", text: "I work in technology, write poetry, and somehow enjoy living between logic and imagination." },
+  { icon: "☕", text: "Many of my best ideas arrive with a cup of chai and absolutely no warning." },
+  { icon: "🎨", text: "I paint my thoughts before I pen them down. Every poem begins as a feeling, an image, or a scene in my mind long before it becomes words on a page." },
+  { icon: "📝", text: "I can spend three hours finding the perfect word and then forget why I opened the fridge." },
+  { icon: "🌏", text: "I moved countries and changed continents, but I still mentally convert everything into Indian measurements and family opinions." },
+  { icon: "🙈", text: "I often sound like I know exactly what I'm doing. That's a carefully cultivated illusion." },
+  { icon: "💭", text: "I overthink for free, but thankfully I also write for free... at least in my head." },
+  { icon: "❤️", text: "Some people collect stamps. I collect stories, awkward moments, and life lessons." },
+];
+
+function FactsAboutMePage() {
+  return (
+    <Page title="">
+      <div className="facts-stage">
+        {/* <div className="facts-decor facts-decor--left" aria-hidden="true">
+          <span className="facts-doodle facts-doodle--dove">🕊️</span>
+          <span className="facts-doodle facts-doodle--chai">☕</span>
+          <span className="facts-doodle facts-doodle--sparkle">✦</span>
+          <span className="facts-doodle facts-doodle--paint">🎨</span>
+          <img className="facts-art facts-art--left" src="/img/art3.jpg" alt="" />
+        </div>
+        <div className="facts-decor facts-decor--right" aria-hidden="true">
+          <span className="facts-doodle facts-doodle--bird">🐦</span>
+          <span className="facts-doodle facts-doodle--laugh">😅</span>
+          <span className="facts-doodle facts-doodle--thought">💭</span>
+          <span className="facts-doodle facts-doodle--flower">🌼</span>
+          <img className="facts-art facts-art--right" src="/img/art6.jpg" alt="" />
+        </div> */}
+        <div className="facts-content" >
+          <section className="facts-intro">
+            {/* <p className="facts-intro__eyebrow">A little beyond the poems ✨</p> */}
+            <p className="facts-intro__lead">A few little truths, quirks, and wonderfully human contradictions that make me, me.</p>
+            {/* <p className="facts-intro__aside">(The fridge story is absolutely true.) 😅</p> */}
+          </section>
+          <section className="facts-grid" aria-label="Fun facts about Saloni Shah">
+            {PERSONAL_FACTS.map((fact, index) => (
+              <article className={`fact-card${index === 0 ? " fact-card--featured" : ""}`} key={fact.text}>
+                <span className="fact-card__icon" aria-hidden="true">{fact.icon}</span>
+                <p>{fact.text}</p>
+                <span className="fact-card__number">{String(index + 1).padStart(2, "0")}</span>
+              </article>
+            ))}
+          </section>
+          <p className="facts-signoff">Somewhere between chai, colour, and a carefully chosen word — that’s where you’ll find me.</p>
+        </div>
+      </div>
     </Page>
   );
 }
@@ -512,7 +582,7 @@ function ContactPage() {
     const payload = Object.fromEntries(formData.entries());
 
     try {
-      const response = await fetch("https://formsubmit.co/ajax/neelprajapatihome@gmail.com", {
+      const response = await fetch("https://formsubmit.co/ajax/salonishah121190@gmail.com", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -538,7 +608,7 @@ function ContactPage() {
     } catch {
       setStatus({
         kind: "error",
-        message: "Sorry, your message could not be sent. Please try again or email neelprajapatihome@gmail.com directly.",
+        message: "Sorry, your message could not be sent. Please try again or email salonishah121190@gmail.com directly.",
       });
     } finally {
       setSending(false);
@@ -562,7 +632,7 @@ function ContactPage() {
           <label htmlFor="contact-message">Message</label>
           <textarea id="contact-message" name="message" rows={6} required />
 
-          <button className="btn" type="submit" disabled={true}>
+          <button className="btn" type="submit" disabled={sending}>
             {sending ? "Sending…" : "Send message"}
           </button>
           {status && (
@@ -621,6 +691,7 @@ export default function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/books/listening-silences" element={<BookPage />} />
           <Route path="/about-me" element={<AboutPage />} />
+          <Route path="/facts-about-me" element={<FactsAboutMePage />} />
           <Route path="/events" element={<EventsPage />} />
           <Route path="/blog" element={<BlogPage />} />
           <Route path="/shop" element={<ShopPage />} />
