@@ -15,7 +15,7 @@ export type BlogPost = {
 };
 
 const projectId = import.meta.env.VITE_SANITY_PROJECT_ID;
-const dataset = import.meta.env.VITE_SANITY_DATASET || "production";
+const dataset = "production";
 
 const client = projectId
   ? createClient({

@@ -14,11 +14,12 @@ rebuilding it.
    enable credentialed access for the website.
 3. In the website root, copy `.env.example` to a new file named `.env` (not
    `.env.example`) and set `VITE_SANITY_PROJECT_ID` to the project ID from
-   Sanity. Keep the dataset as `production` unless you created a different one.
+   Sanity. The website reads from the `production` dataset; no dataset
+   environment variable is needed.
 4. In the `studio` folder, copy `studio/.env.example` to a new file named
    `studio/.env` and set `SANITY_STUDIO_PROJECT_ID` to the same ID. Use the same
-   dataset value as the website. The Studio loads this file when its commands
-   run; do not rename or overwrite the example file.
+   `production` dataset for `SANITY_STUDIO_DATASET`. The Studio loads this file
+   when its commands run; do not rename or overwrite the example file.
 5. Start the editor locally:
 
    ```sh
@@ -47,11 +48,11 @@ rebuilding it.
    ```
 
    Upload the generated `dist` folder to GoDaddy hosting. If you build through
-   a CI service, configure the same `VITE_SANITY_PROJECT_ID` and
-   `VITE_SANITY_DATASET` values in its build environment. These values identify
-   the public Sanity project and dataset; do not put private API tokens in the
-   website. Upload the hidden `.htaccess` file from `dist` as well; it routes
-   direct requests such as `/blog/story-slug` back through React Router.
+   a CI service, configure `VITE_SANITY_PROJECT_ID` in its build environment.
+   The project ID and dataset name are public identifiers; do not put private
+   API tokens in the website. Upload the hidden `.htaccess` file from `dist` as
+   well; it routes direct requests such as `/blog/story-slug` back through
+   React Router.
 
 ## Publishing a story
 
