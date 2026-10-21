@@ -1,32 +1,77 @@
-# React + TypeScript + Vite
+# Saloni Shah website
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+The website is a static React/Vite site. Blog posts are managed separately in
+Sanity Studio, so publishing a story does not require changing this site or
+rebuilding it.
 
-Currently, two official plugins are available:
+## Set up the blog
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+1. Create a Sanity project at [sanity.io/manage](https://www.sanity.io/manage)
+   and create a dataset named `production`.
+2. In the Sanity project's **API > CORS origins**, allow the exact public
+   website origins (for example, `https://example.com` and
+   `https://www.example.com`). These are read-only browser requests; do not
+   enable credentialed access for the website.
+3. In the website root, copy `.env.example` to a new file named `.env` (not
+   `.env.example`) and set `VITE_SANITY_PROJECT_ID` to the project ID from
+   Sanity. Keep the dataset as `production` unless you created a different one.
+4. In the `studio` folder, copy `studio/.env.example` to a new file named
+   `studio/.env` and set `SANITY_STUDIO_PROJECT_ID` to the same ID. Use the same
+   dataset value as the website. The Studio loads this file when its commands
+   run; do not rename or overwrite the example file.
+5. Start the editor locally:
 
-## React Compiler
+   ```sh
+   cd studio
+   npm install
+   npm run dev
+   ```
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+   Sign in with a Sanity account that has access to the project. In Sanity
+   project management, invite the author with the Editor role.
+6. Deploy the editor once:
 
-## Expanding the Oxlint configuration
+   ```sh
+   npm run deploy
+   ```
 
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
+   Choose a Studio hostname when prompted and share the resulting
+   `*.sanity.studio` URL with the author. The editor can also be hosted at a
+   custom domain later.
+7. Build the website with its root `.env` values:
 
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+   ```sh
+   cd ..
+   npm install
+   npm run build
+   ```
+
+   Upload the generated `dist` folder to GoDaddy hosting. If you build through
+   a CI service, configure the same `VITE_SANITY_PROJECT_ID` and
+   `VITE_SANITY_DATASET` values in its build environment. These values identify
+   the public Sanity project and dataset; do not put private API tokens in the
+   website. Upload the hidden `.htaccess` file from `dist` as well; it routes
+   direct requests such as `/blog/story-slug` back through React Router.
+
+## Publishing a story
+
+The author signs in to the Sanity Studio URL, opens **Blog post**, and creates
+a post. Add a title, story, and publication date; the URL slug is generated
+from the title and can be edited. A short introduction and cover image are
+optional. Publish the document to make it visible on the website. The blog
+fetches published posts from Sanity when visitors open it, so new posts appear
+without redeploying the GoDaddy-hosted site.
+
+After uploading the site, test a blog post by opening its URL directly and
+refreshing the page. If GoDaddy's File Manager hides dotfiles, enable hidden
+files and confirm `.htaccess` is present in the hosting web root.
+
+## Local website development
+
+Set the website environment variables as described above, then run these from
+the repository root:
+
+```sh
+npm install
+npm run dev
 ```
-
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.

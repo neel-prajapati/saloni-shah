@@ -7,9 +7,11 @@ import {
   type ReactNode,
   type SetStateAction,
 } from "react";
-import { BrowserRouter, Routes, Route, Link, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Link, useLocation, useParams } from "react-router-dom";
+import { PortableText, type PortableTextComponents } from "@portabletext/react";
 import "./App.css";
 import "./theme.css";
+import { getBlogPosts, type BlogPost } from "./blog";
 
 const SITE_NAME = "Saloni Shah";
 
@@ -330,10 +332,10 @@ function Footer() {
   );
 }
 
-function Page({ title, children }: { title: string; children: ReactNode }) {
+function Page({ title, children }: { title?: string; children: ReactNode }) {
   return (
     <section className="page">
-      <h1 className="page__title">{title}</h1>
+      {title && <h1 className="page__title">{title}</h1>}
       {children}
     </section>
   );
@@ -519,7 +521,7 @@ function FactsAboutMePage() {
           </section>
           <section className="facts-grid" aria-label="Fun facts about Saloni Shah">
             {PERSONAL_FACTS.map((fact, index) => (
-              <article className={`fact-card${index === 0 ? " fact-card--featured" : ""}`} key={fact.text}>
+              <article className={`fact-card${index === 1200 ? " fact-card--featured" : ""}`} key={fact.text}>
                 <span className="fact-card__icon" aria-hidden="true">{fact.icon}</span>
                 <p>{fact.text}</p>
                 <span className="fact-card__number">{String(index + 1).padStart(2, "0")}</span>
@@ -561,12 +563,166 @@ function EventsPage() {
 }
 
 function BlogPage() {
+  const { posts, loading, error, reload } = useBlogPosts();
+
   return (
-    <Page title="Blog">
-      <p className="muted">Posts will appear here.</p>
+    <Page>
+      {loading && <p className="muted" role="status">Loading stories…</p>}
+      {error && (
+        <div className="blog__notice" role="alert">
+          <p>Blog posts could not be loaded right now. Please try again.</p>
+          <button className="btn" type="button" onClick={reload}>Try again</button>
+        </div>
+      )}
+      {!loading && !error && posts.length === 0 && (
+        <p className="muted">New stories are on their way. Please check back soon.</p>
+      )}
+      {!loading && !error && posts.length > 0 && (
+        <div className="blog-list">
+          {posts.map((post) => (
+            <article className="blog-card" key={post.id}>
+              {post.coverImage && (
+                <Link to={`/blog/${post.slug}`} tabIndex={-1} aria-hidden="true">
+                  <img
+                    className="blog-card__image"
+                    src={post.coverImage.url}
+                    alt={post.coverImage.alt ?? ""}
+                    loading="lazy"
+                  />
+                </Link>
+              )}
+              <div className="blog-card__content">
+                <time className="blog-card__date" dateTime={post.publishedAt}>
+                  {formatBlogDate(post.publishedAt)}
+                </time>
+                <h2 className="blog-card__title">
+                  <Link to={`/blog/${post.slug}`}>{post.title}</Link>
+                </h2>
+                {post.excerpt && <p className="blog-card__excerpt">{post.excerpt}</p>}
+                <Link className="blog-card__link" to={`/blog/${post.slug}`}>
+                  Read the story <span aria-hidden="true">→</span>
+                </Link>
+              </div>
+            </article>
+          ))}
+        </div>
+      )}
     </Page>
   );
 }
+
+function useBlogPosts() {
+  const [posts, setPosts] = useState<BlogPost[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+  const [attempt, setAttempt] = useState(0);
+
+  useEffect(() => {
+    let active = true;
+
+    getBlogPosts()
+      .then((nextPosts) => {
+        if (active) setPosts(nextPosts);
+      })
+      .catch((cause: unknown) => {
+        console.error("Unable to load blog posts.", cause);
+        if (active) setError(true);
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [attempt]);
+
+  const reload = () => {
+    setLoading(true);
+    setError(false);
+    setAttempt((value) => value + 1);
+  };
+
+  return { posts, loading, error, reload };
+}
+
+function formatBlogDate(value: string) {
+  return new Intl.DateTimeFormat("en-AU", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    timeZone: "UTC",
+  }).format(new Date(value));
+}
+
+function BlogPostPage() {
+  const { slug } = useParams();
+  const { posts, loading, error, reload } = useBlogPosts();
+  const post = posts.find((item) => item.slug === slug);
+
+  if (loading) {
+    return <Page title="Blog"><p className="muted" role="status">Loading story…</p></Page>;
+  }
+
+  if (error) {
+    return (
+      <Page title="Blog">
+        <div className="blog__notice" role="alert">
+          <p>This story could not be loaded right now. Please try again.</p>
+          <button className="btn" type="button" onClick={reload}>Try again</button>
+        </div>
+      </Page>
+    );
+  }
+
+  if (!post) {
+    return (
+      <Page title="Story not found">
+        <p className="muted">This story may have been moved or unpublished.</p>
+        <p><Link className="blog__back" to="/blog">Back to all stories</Link></p>
+      </Page>
+    );
+  }
+
+  return (
+    <article className="page blog-post">
+      <Link className="blog__back" to="/blog">← All stories</Link>
+      <header className="blog-post__header">
+        <time className="blog-card__date" dateTime={post.publishedAt}>
+          {formatBlogDate(post.publishedAt)}
+        </time>
+        <h1 className="page__title">{post.title}</h1>
+        {post.excerpt && <p className="blog-post__excerpt">{post.excerpt}</p>}
+      </header>
+      {post.coverImage && (
+        <img className="blog-post__image" src={post.coverImage.url} alt={post.coverImage.alt ?? ""} />
+      )}
+      <div className="blog-post__body">
+        <PortableText value={post.body} components={blogTextComponents} />
+      </div>
+    </article>
+  );
+}
+
+const blogTextComponents: PortableTextComponents = {
+  marks: {
+    link: ({ children, value }) => {
+      const href = value?.href;
+      if (
+        typeof href !== "string" ||
+        (!/^https?:\/\//i.test(href) && !/^mailto:/i.test(href))
+      ) {
+        return <>{children}</>;
+      }
+      const external = /^https?:\/\//i.test(href);
+      return (
+        <a href={href} target={external ? "_blank" : undefined} rel="noopener noreferrer">
+          {children}
+        </a>
+      );
+    },
+  },
+};
 
 function ContactPage() {
   const [sending, setSending] = useState<boolean>(false);
@@ -694,6 +850,7 @@ export default function App() {
           <Route path="/facts-about-me" element={<FactsAboutMePage />} />
           <Route path="/events" element={<EventsPage />} />
           <Route path="/blog" element={<BlogPage />} />
+          <Route path="/blog/:slug" element={<BlogPostPage />} />
           <Route path="/shop" element={<ShopPage />} />
           <Route path="/contact-us" element={<ContactPage />} />
           <Route path="/cart" element={<CartPage />} />
