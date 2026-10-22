@@ -214,7 +214,7 @@ const NAV: NavItem[] = [
   { label: "Events", to: "/events" },
   { label: "Blog", to: "/blog" },
   { label: "Shop", to: "/shop" },
-  { label: "Contact Us", to: "/contact-us" },
+  { label: "Contact Me", to: "/contact-me" },
 ];
 
 const SOCIALS = [
@@ -316,7 +316,7 @@ function Footer() {
             <li><Link to="/events">Events</Link></li>
             <li><Link to="/blog">Blog</Link></li>
             <li><Link to="/shop">Shop</Link></li>
-            <li><Link to="/contact-us">Contact Us</Link></li>
+            <li><Link to="/contact-me">Contact Me</Link></li>
           </ul>
         </div>
       </div>
@@ -727,6 +727,13 @@ const blogTextComponents: PortableTextComponents = {
 function ContactPage() {
   const [sending, setSending] = useState<boolean>(false);
   const [status, setStatus] = useState<{ kind: "success" | "error"; message: string } | null>(null);
+  const [formFields, setFormFields] = useState({
+    name: "",
+    email: "",
+    subject: "",
+    message: "",
+  });
+  const canSubmit = Object.values(formFields).every((value) => value.trim().length > 0);
 
   const submitContact = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -761,6 +768,7 @@ function ContactPage() {
         message: "Thanks for reaching out. Your message has been sent.",
       });
       form.reset();
+      setFormFields({ name: "", email: "", subject: "", message: "" });
     } catch {
       setStatus({
         kind: "error",
@@ -772,23 +780,65 @@ function ContactPage() {
   };
 
   return (
-    <Page title="Contact Us">
+    <Page title="Contact Me">
       <div className="contact">
         <p className="contact__intro">Have a question, an event enquiry, or just want to say hello? Send me a message.</p>
         <form className="contact__form" onSubmit={submitContact}>
-          <label htmlFor="contact-name">Name</label>
-          <input id="contact-name" name="name" type="text" autoComplete="name" required />
+          <label htmlFor="contact-name">What should I call you?</label>
+          <input
+            id="contact-name"
+            name="name"
+            type="text"
+            autoComplete="name"
+            required
+            value={formFields.name}
+            onChange={(e) => {
+              const name = e.currentTarget.value;
+              setFormFields((fields) => ({ ...fields, name }));
+            }}
+          />
 
-          <label htmlFor="contact-email">Email address</label>
-          <input id="contact-email" name="email" type="email" autoComplete="email" required />
+          <label htmlFor="contact-email">Where can I write back to you?</label>
+          <input
+            id="contact-email"
+            name="email"
+            type="email"
+            autoComplete="email"
+            required
+            value={formFields.email}
+            onChange={(e) => {
+              const email = e.currentTarget.value;
+              setFormFields((fields) => ({ ...fields, email }));
+            }}
+          />
 
           <label htmlFor="contact-subject">Subject</label>
-          <input id="contact-subject" name="subject" type="text" required />
+          <input
+            id="contact-subject"
+            name="subject"
+            type="text"
+            required
+            value={formFields.subject}
+            onChange={(e) => {
+              const subject = e.currentTarget.value;
+              setFormFields((fields) => ({ ...fields, subject }));
+            }}
+          />
 
-          <label htmlFor="contact-message">Message</label>
-          <textarea id="contact-message" name="message" rows={6} required />
+          <label htmlFor="contact-message">What story would you like to share?</label>
+          <textarea
+            id="contact-message"
+            name="message"
+            rows={6}
+            required
+            value={formFields.message}
+            onChange={(e) => {
+              const message = e.currentTarget.value;
+              setFormFields((fields) => ({ ...fields, message }));
+            }}
+          />
 
-          <button className="btn" type="submit" disabled={sending}>
+          <button className="btn" type="submit" disabled={sending || !canSubmit}>
             {sending ? "Sending…" : "Send message"}
           </button>
           {status && (
@@ -852,7 +902,7 @@ export default function App() {
           <Route path="/blog" element={<BlogPage />} />
           <Route path="/blog/:slug" element={<BlogPostPage />} />
           <Route path="/shop" element={<ShopPage />} />
-          <Route path="/contact-us" element={<ContactPage />} />
+          <Route path="/contact-me" element={<ContactPage />} />
           <Route path="/cart" element={<CartPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
